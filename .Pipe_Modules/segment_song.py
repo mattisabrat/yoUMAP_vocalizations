@@ -40,7 +40,6 @@ input_paths = input_paths.split('__SPLIT__')
 #define our config file
 config = configparser.ConfigParser()
 config.read(config_path)
-param_dict = 
 #Read the config into the dictionary
 param_dict = {}
 param_dict[dset] = {
@@ -101,14 +100,13 @@ if not os.path.exists(output_path+'csv/'):  os.makedirs(output_path + 'csv/')
 
 ##Segment the files
 with Parallel(n_jobs=nThreads, verbose=0) as parallel:
-    parallel( delayed( birdname, 
-                       filename,
-                       wav_time,
-                       param_dict[dset],
-                       output,
-                       visualize= False,
-                       skip_created= True,
-                       save_spectrograms= True,
-                       verbose=verbose) 
-    for idx, filename, wav_time, dset, birdname in wav_df.iterrows())
-    
+    parallel(
+        delayed( birdname, 
+                 filename,
+                 wav_time,
+                 param_dict[dset],
+                 output,
+                 visualize= False,
+                 skip_created= True,
+                 save_spectrograms= True) 
+            for idx, filename, wav_time, dset, birdname in wav_df.iterrows())
