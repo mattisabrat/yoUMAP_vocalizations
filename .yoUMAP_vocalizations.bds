@@ -57,9 +57,9 @@ par{
         seg_song_csv  := animal_dest + 'csv/'
         
         #make the dir
-        if ( !animal_dest.isDir() )  { animal_dest.mkdir() }
-        if ( !seg_song_wav.isDir() ) { seg_song_wav.mkdir() }
-        if ( !seg_song_csv.isDir() ) { seg_song_csv.mkdir() }
+        if (!animal_dest.isDir())  {animal_dest.mkdir()}
+        if (!seg_song_wav.isDir()) {seg_song_wav.mkdir()}
+        if (!seg_song_csv.isDir()) {seg_song_csv.mkdir()}
         
         
         #---------------------------------------------------------------
@@ -113,7 +113,7 @@ par{
         out_dest := segmented_syllables + sample+ '/'
         
         #make the hdf5 (the demo code premade it, so I will too)
-        if ( !out_dest.isDir() ) { out_dest.mkdir() }
+        if (!out_dest.isDir()) {out_dest.mkdir()}
         
         #---------------------------------------------------------------
         #Run the task
@@ -165,8 +165,8 @@ par{
         seq_csv := seq_dir + sample + '_sequenced_syllables.csv'
         
         #make the output locations
-        if ( !syl_dir.isDir() ) { syl_dir.mkdir() }
-        if ( !seq_dir.isDir() ) { seq_dir.mkdir() }
+        if (!syl_dir.isDir()) {syl_dir.mkdir()}
+        if (!seq_dir.isDir()) {seq_dir.mkdir()}
         
         #---------------------------------------------------------------
         #Run the task
@@ -205,8 +205,8 @@ par{
         seq_csv := seq_dir + 'all_sequenced_syllables.csv'
         
         #make the output locations
-        if ( !syl_dir.isDir() ) { syl_dir.mkdir() }
-        if ( !seq_dir.isDir() ) { seq_dir.mkdir() }
+        if (!syl_dir.isDir()) {syl_dir.mkdir()}
+        if (!seq_dir.isDir()) {seq_dir.mkdir()}
         
         #execute the same task, but one the combined list
         #the difference in the run is handled by the module
