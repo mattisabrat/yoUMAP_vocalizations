@@ -27,14 +27,16 @@ export PYTHONPATH=$PWD/.bin/Python/bin:$PYTHONPATH
 #-------------------------------------------------------------------------
 
 Provided_Dir=false
-Provided_Flags=0
+mode=1
 nThreads=1
+config=$PWD/.Defaults.config
 
-while getopts ':e:n:f' flag; do
+while getopts ':e:n:m:c:' flag; do
   case "${flag}" in
     e) Provided_Dir=true; Experiment="${OPTARG}";;  #mandatory flag
     n) nThreads="${OPTARG}" ;;
-    f) Provided_Flags=1;;
+    m) mode="${OPTARG}";;
+    c) config="${OPTARG}";;
   esac
 done
 
@@ -52,4 +54,4 @@ fi
 #--------------------------------------------------------------------------
 #Execute the pipeline on the specified directory
 #--------------------------------------------------------------------------
-bds -c $PWD/.bin/bds/bds.config ./.Pipeline.bds -e ${Experiment}  -n ${nThreads} -f ${Provided_Flags}
+bds -c $PWD/.bin/bds/bds.config ./.yoUMAP_vocalizations.bds -e ${Experiment}  -n ${nThreads} -m ${mode}

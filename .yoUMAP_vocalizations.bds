@@ -1,0 +1,281 @@
+#!/usr/bin/env bds
+
+#-------------------------------------------------------------------
+#set up default values for all incomig flags
+#are automatically overwritten by supplied values
+#-------------------------------------------------------------------
+
+string e = "Not_A_Dir"                 #experimental directory variable 
+int n    = 1                          #default number of cores per task
+string c = ppwd + '/.Defaults.config' #path to the config file
+int m    = 1
+
+
+#-------------------------------------------------------------------
+#save all your usefull paths to prevent grief later
+#-------------------------------------------------------------------
+
+#Top Level
+experiment     := e 
+pipe_modules   := ppwd + '/.Pipe_Modules'
+default_config := ppwd + '/.Defaults.config'
+
+#Input Folders
+inputs        := experiment + 'Raw_Inputs/'
+
+#Output folders, we'll make these on the fly later
+segmented_songs     := experiment + 'Segmented_Songs/'
+segmented_syllables := experiment + 'Segmented_Syllables/' 
+clustered_syllables := experiment + 'Clustered_Syllables/'
+sequenced_syllables := experiment + 'Syllable_Sequences/'
+
+
+#-------------------------------------------------------------------
+#Get a list of all the input animal and parallelize 
+#song segmentation across them
+#-------------------------------------------------------------------
+
+string[] input_samples = inputs.dir() #list of sample names (not paths)
+par{
+    for( string sample : input_samples ){
+    
+        #---------------------------------------------------------------
+        #Handle the paths for this sample
+        #---------------------------------------------------------------
+        
+        #build the path
+        sample_path := inputs + sample + '/'
+        
+        #get the paths to the data files based on a glob
+        wav_list := sample_path.dirPath('*.wav')
+        wav_file := wav_list.join('__SPLIT__')
+        
+        #set up the intermediate dirs for the files
+        seg_song_dest := segmented_songs + sample + '/'
+        animal_dest   := seg_song_dest + sample + '/'
+        seg_song_wav  := animal_dest + 'wavs/'
+        seg_song_csv  := animal_dest + 'csv/'
+        
+        #make the dir
+        if ( !animal_dest.isDir() )  { animal_dest.mkdir() }
+        if ( !seg_song_wav.isDir() ) { seg_song_wav.mkdir() }
+        if ( !seg_song_csv.isDir() ) { seg_song_csv.mkdir() }
+        
+        
+        #---------------------------------------------------------------
+        #Run the tasks
+        #---------------------------------------------------------------
+
+        #info for the task
+        task_seg_song := 'Segmenting songs: ' + sample
+        
+        #define the chk file
+        song_chk := seg_song_dest + 'song_chk.txt'
+        
+        #Task for segmenting songs
+        string Song_tid = task(taskName := task_seg_song, song_chk <- wav_list, cpus := n){
+            #provide some feedback
+            sys echo $task_seg_song
+            
+            #fill the chk file
+            sys date >> $song_chk
+            
+            #Run the module        
+            sys python3 $pipe_modules/segment_songs.py -i "$wav_file" -o $seg_song_dest -s $sample -n $n -c $c
+        }
+    }
+}
+
+#Let all tasks finish
+wait
+
+
+#-------------------------------------------------------------------
+#list of all the animals w/ segmented songs and 
+#parallelize syllable segmentation
+#-------------------------------------------------------------------
+string[] song_samples = segmented_songs.dir()
+par{
+    for( string sample : song_samples ){
+        #---------------------------------------------------------------
+        #Handle the paths for this sample
+        #---------------------------------------------------------------
+        
+        #build the path
+        sample_path := segmented_songs + sample + '/' + sample + '/wavs/'
+        
+        #get the paths to the data files based on a glob
+        wav_list := sample_path.dirPath('*.wav')
+        wav_file := wav_list.join('__SPLIT__')
+        
+        #set up the output dirs for the files
+        out_hdf5 := segmented_syllables + sample + '/' + sample + '_segmented_syllables.hdf5'
+        out_dest := segmented_syllables + sample+ '/'
+        
+        #make the hdf5 (the demo code premade it, so I will too)
+        if ( !out_dest.isDir() ) { out_dest.mkdir() }
+        
+        #---------------------------------------------------------------
+        #Run the task
+        #---------------------------------------------------------------
+        
+        #info for the task
+        task_seg_syls := 'Segmenting syllables: ' + sample
+        
+        #Task for segmenting syllables
+        string Syll_tid = task(taskName := task_seg_syls, out_hdf5 <- wav_list, cpus := n){
+            #provide some feedback
+            sys echo $task_seg_syls
+
+            #Run the module
+            sys python3 $pipe_modules/segment_syllables.py -i "$wav_file" -o $out_hdf5 -s $sample -n $n -c $c   
+        }
+    }
+}
+
+#Let finish
+wait
+
+
+#-------------------------------------------------------------------
+#list of all the syllable hdf5s which need embedding, clustering, and sequencing.
+#parallelize across them for animal level clustering
+#save a list hdf5s for the experiment level clustering at the end
+#-------------------------------------------------------------------
+string[] hdf5_list #init list
+string[] fully_segmeted_samples = segmented_syllables.dir()
+par{
+    for( string sample : fully_segmeted_samples ){
+        
+        #---------------------------------------------------------------
+        #Handle the paths for this sample
+        #---------------------------------------------------------------
+
+        #build the path
+        sample_path := segmented_syllables + sample
+        
+        #get the paths to the data files based on a glob
+        hdf5_file := sample_path.dirPath('*.hdf5').join() #get file
+        hdf5_list += hdf5_file #append to list
+        
+        #Set up the paths for the csvs
+        syl_dir := clustered_syllables + sample + '/'
+        seq_dir := sequenced_syllables + sample + '/'
+        syl_csv := syl_dir + sample + '_clustered_syllables.csv'
+        seq_csv := seq_dir + sample + '_sequenced_syllables.csv'
+        
+        #make the output locations
+        if ( !syl_dir.isDir() ) { syl_dir.mkdir() }
+        if ( !seq_dir.isDir() ) { seq_dir.mkdir() }
+        
+        #---------------------------------------------------------------
+        #Run the task
+        #---------------------------------------------------------------
+        
+        #info for the task
+        task_cluster := 'Clustering and sequencing: ' + sample
+
+        if (m == 1 || m == 2) {
+            #Task for clustering and sequencing
+            string Cluster_tid = task(taskName := task_cluster, [syl_csv, seq_csv] <- hdf5_file, cpus := n){
+                
+                #provide some feedback
+                sys echo $task_cluster
+                
+                #Run the module
+                sys python3 $pipe_modules/cluster_syllables.py -s $sample -i $hdf5_file -o $syl_csv -p $seq_csv -n $n -c $c
+            }    
+        }
+    }
+    
+    if (m == 1 || m ==3){
+
+        #Now the experiment level run. This is the slowest bit in the code because its clustering on all syllables
+        
+        #info for the task
+        task_cluster := 'Clustering and sequencing: all_samples'
+        
+        #Collapse the list of paths
+        hdf5_file := hdf5_list.join('__SPLIT__')
+        
+        #Set up the paths for the csvs
+        syl_dir := clustered_syllables + 'all_syllables/'
+        seq_dir := sequenced_syllables + 'all_syllables/'
+        syl_csv := syl_dir + 'all_clustered_syllables.csv' 
+        seq_csv := seq_dir + 'all_sequenced_syllables.csv'
+        
+        #make the output locations
+        if ( !syl_dir.isDir() ) { syl_dir.mkdir() }
+        if ( !seq_dir.isDir() ) { seq_dir.mkdir() }
+        
+        #execute the same task, but one the combined list
+        #the difference in the run is handled by the module
+        #this is a long ass task, thats why I made it optional with the -m flag 
+        string Cluster_tid = task(taskName := task_cluster, [syl_csv, seq_csv] <- hdf5_list, cpus := n){
+            #provide some feedback
+            sys echo $task_cluster
+
+            sys python3 $pipe_modules/cluster_syllables.py -s 'all_samples' -i $hdf5_file -o $syl_csv -p $seq_csv -n $n -c $c
+        }     
+    }    
+}
+
+#Let finish
+wait
+
+
+#-------------------------------------------------------------------
+#list all syl_csv and seq_csv files
+#Pull them into R as dataframes and save list of dfs at Experiment/
+#Handle in parallel
+#-------------------------------------------------------------------
+
+#glob all the paths
+string[] syl_csv_list 
+string[] seq_csv_list 
+
+#list all samples that made it through clustering
+string[] clustered_samples = clustered_syllables.dir()
+for (string sample : clustered_samples) {
+    
+    #Build the paths
+    syl_path := clustered_syllables + sample +'/'
+    seq_path := sequenced_syllables + sample +'/'
+    
+    syl_csv_list += syl_path.dirPath('*_clustered_syllables.csv')
+    seq_csv_list += seq_path.dirPath('*_sequenced_syllables.csv')
+    
+}
+
+#join the lists
+syl_csv_file := syl_csv_list.join('__SPLIT__')
+seq_csv_file := seq_csv_list.join('__SPLIT__')
+
+#set up the output paths
+syl_rds := experiment + 'Clustered_Syllables.rds'
+seq_rds := experiment + 'Sequenced_Syllables.rds'
+
+#info for the tasks
+task_agg_syl := 'Aggregating Syllable Datasets'
+task_agg_seq := 'Aggregating Sequence Datasets'
+
+#Aggregate the data in R. Do it in parallel bc why not
+par{
+    #execute the task for the syllables
+    string Agg_syl_tid = task(taskName := task_agg_syl, syl_rds <- syl_csv_list, cpus := n){
+        #provide some feedback
+        sys echo $task_agg_syl
+        
+         
+    
+    }
+    
+    #execute the task for the sequences
+    string Agg_seq_tid = task(taskName := task_agg_seq, seq_rds <- seq_csv_list, cpus := n){
+        #provide some feedback
+        sys echo $task_agg_seq
+        
+        
+    
+    }
+}

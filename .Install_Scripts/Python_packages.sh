@@ -1,11 +1,12 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 
 #update pip
 python3 -m pip install --upgrade pip
 
 #Install some stuff
+python3 -m pip install .bin/AVGN/.
 python3 -m pip install Cython==0.29.13 
-python3 -m pip install Jinjna2==2.10.3
+python3 -m pip install Jinja2==2.10.3
 python3 -m pip install MarkupSafe==1.1.1
 python3 -m pip install Pillow==6.2.1
 python3 -m pip install PyWavelets==1.1.1
@@ -15,12 +16,12 @@ python3 -m pip install SoundFile==0.10.2
 python3 -m pip install asteval==0.9.16
 python3 -m pip install attrs==19.3.0
 python3 -m pip install audioread==2.1.8
-python3 -m pip install backcall== 0.1.0
+python3 -m pip install backcall==0.1.0
 python3 -m pip install bleach==3.1.0
 python3 -m pip install cffi==1.13.1 
 python3 -m pip install cycler==0.10.0
 python3 -m pip install decorator==4.4.1
-python3 -m pip install defusedxml== 0.6.0
+python3 -m pip install defusedxml==0.6.0
 python3 -m pip install entrypoints==0.3  
 python3 -m pip install h5py==2.10.0      
 python3 -m pip install hdbscan==0.8.23   
@@ -33,7 +34,7 @@ python3 -m pip install ipywidgets==7.5.1
 python3 -m pip install jedi==0.15.1      
 python3 -m pip install joblib==0.14.0    
 python3 -m pip install jsonschema==3.1.1 
-python3 -m pip install jupyter-client== 5.3.4
+python3 -m pip install jupyter-client==5.3.4
 python3 -m pip install jupyter-core==4.6.1   
 python3 -m pip install kiwisolver==1.1.0     
 python3 -m pip install librosa==0.7.1        

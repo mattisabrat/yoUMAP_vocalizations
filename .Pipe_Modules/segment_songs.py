@@ -10,7 +10,7 @@ import os
 from tqdm import tqdm_notebook as tqdm
 from glob import glob
 import re 
-from datetime import datetime, timedelta
+from datetime import datetime as dt
 import pandas as pd 
 from sklearn.externals.joblib import Parallel, delayed
 import configparser
@@ -22,27 +22,35 @@ import avgn.segment_song.preprocessing as pp
 
 ##Front end
 #Read opts
-opts, args = getopt.getopt(sys.argv[1:], 'i:o:n:s:c:e:')
+opts, args = getopt.getopt(sys.argv[1:], 'i:o:n:s:c:')
 
 for opt, arg in opts:
     if   opt in ('-i'): wav_list    = str(arg)
     elif opt in ('-o'): output_path = str(arg)
     elif opt in ('-n'): nThreads    = int(arg)
-    elif opt in ('-s'): name        = str(arg)
+    elif opt in ('-s'): sample      = str(arg)
     elif opt in ('-c'): config_path = str(arg)
-    elif opt in ('-e'): dset        = str(arg)
 
-#Split the input_paths into a vector we can iterate on
-input_paths = input_paths.split('__SPLIT__')
+#Split the input_paths and animal names into vectors
+wav_list     = wav_list.split('__SPLIT__')
+animal_names = [sample] * len(wav_list)
 
+#Create the vecotr of elast edited time.
+wav_times = [dt.fromtimestamp(os.path.getmtime(wav_path)) 
+             for wav_path in wav_list]
+
+# Make a pandas dataframe with the file paths, date_times, and names 
+wav_df = pd.DataFrame.from_dict({'filename': wav_list,
+                                 'wav_time': wav_times,
+                                 'name': animal_names})
 
 ##Read in params
 #define our config file
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(strict=False)
 config.read(config_path)
+
 #Read the config into the dictionary
-param_dict = {}
-param_dict[dset] = {
+param_dict = {
     # Filtering and padding
     'lowcut' : float(config.get('segment_songs', 'lowcut')), 
     'highcut': float(config.get('segment_songs', 'highcut')),
@@ -73,40 +81,17 @@ param_dict[dset] = {
     'vocal_freq_max' : float(config.get('segment_songs', 'vocal_freq_max'))
     }
 
-##Prepare for the segmentation, make the input variables and output locations
-#Create dummy datetimes for the wavs, a list containting the bird name, and a list of the experiment ID (inherited from the experiment folder name)
-wav_times  = []
-bird_names = []
-dset_list  = []
-q=0 #arbitrary counter
-
-for file in input_paths:
-    dt = datetime(0001,1,1,0,0)+timedelta(days=q)
-    q+=1
-    wav_times.append(dt) 
-    bird_names.append(name) 
-    dset_list.append(dset)
-
-# Make a pandas dataframe with the file paths, "datetimes", dset 
-wav_df = pd.DataFrame.from_dict({'filename': wav_list,
-                                 'wav_time': wav_times,
-                                 'dset'    : dset_list,
-                                 'birdname': bird_names})
-
-# Create the output locations
-if not os.path.exists(output_path+'wavs/'): os.makedirs(output_path + 'wavs/') 
-if not os.path.exists(output_path+'csv/'):  os.makedirs(output_path + 'csv/')
-
 
 ##Segment the files
 with Parallel(n_jobs=nThreads, verbose=0) as parallel:
     parallel(
-        delayed( birdname, 
-                 filename,
-                 wav_time,
-                 param_dict[dset],
-                 output,
-                 visualize= False,
-                 skip_created= True,
-                 save_spectrograms= True) 
-            for idx, filename, wav_time, dset, birdname in wav_df.iterrows())
+        delayed(pp.process_bird_wav)(row['name'], 
+                                     row['filename'],
+                                     row['wav_time'],
+                                     param_dict,
+                                     output_path,
+                                     verbose = True,
+                                     visualize= False,
+                                     skip_created= True,
+                                     save_spectrograms= True) 
+            for idx, row in wav_df.iterrows())
