@@ -34,7 +34,6 @@ opts, args = getopt.getopt(sys.argv[1:], 'i:o:n:s:c:m:p:')
 for opt, arg in opts:
     if   opt in ('-i'): hdf_list      = str(arg)
     elif opt in ('-o'): syllable_path = str(arg)
-    elif opt in ('-p'): sequence_path = str(arg)
     elif opt in ('-n'): nThreads      = int(arg)
     elif opt in ('-s'): animal        = str(arg)
     elif opt in ('-c'): config_path   = str(arg)
@@ -116,15 +115,5 @@ logging.info('%s had %s/1 of syllables unlabelled' % (animal, frac_unlabelled,))
 #Add sequence info to the dataframe
 content = split_times_into_seqs(hdf_content, max_timedelta, seq_len_cutoff)
 
-#Create dataframe of sequences
-seq_content = syllables_to_sequences( hdf_content, ['labels','z','original_wav',
-                                                 'spectrograms','start_time_rel_wav',
-                                                 'syll_length_s']).rename(columns={
-                                                     'labels': 'sequence'
-                                                         })
-seq_content['lens'] = [len(i) for i in seq_content.sequence.values]
-
-
-#save the dataframes
+#save the dataframe
 hdf_content.to_csv(syllable_path)
-seq_content.to_csv(sequence_path)

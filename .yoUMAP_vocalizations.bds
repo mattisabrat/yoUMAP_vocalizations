@@ -27,7 +27,7 @@ inputs        := experiment + 'Raw_Inputs/'
 segmented_songs     := experiment + 'Segmented_Songs/'
 segmented_syllables := experiment + 'Segmented_Syllables/' 
 clustered_syllables := experiment + 'Clustered_Syllables/'
-sequenced_syllables := experiment + 'Syllable_Sequences/'
+sequenced_syllables := experiment + 'Sequenced_Syllables/'
 
 
 #-------------------------------------------------------------------
@@ -160,13 +160,10 @@ par{
         
         #Set up the paths for the csvs
         syl_dir := clustered_syllables + sample + '/'
-        seq_dir := sequenced_syllables + sample + '/'
         syl_csv := syl_dir + sample + '_clustered_syllables.csv'
-        seq_csv := seq_dir + sample + '_sequenced_syllables.csv'
         
         #make the output locations
         if (!syl_dir.isDir()) {syl_dir.mkdir()}
-        if (!seq_dir.isDir()) {seq_dir.mkdir()}
         
         #---------------------------------------------------------------
         #Run the task
@@ -177,13 +174,13 @@ par{
 
         if (m == 1 || m == 2) {
             #Task for clustering and sequencing
-            string Cluster_tid = task(taskName := task_cluster, [syl_csv, seq_csv] <- hdf5_file, cpus := n){
+            string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_file, cpus := n){
                 
                 #provide some feedback
                 sys echo $task_cluster
                 
                 #Run the module
-                sys python3 $pipe_modules/cluster_syllables.py -s $sample -i $hdf5_file -o $syl_csv -p $seq_csv -n $n -c $c
+                sys python3 $pipe_modules/cluster_syllables.py -s $sample -i $hdf5_file -o $syl_csv -n $n -c $c
             }    
         }
     }
@@ -200,22 +197,19 @@ par{
         
         #Set up the paths for the csvs
         syl_dir := clustered_syllables + 'all_syllables/'
-        seq_dir := sequenced_syllables + 'all_syllables/'
         syl_csv := syl_dir + 'all_clustered_syllables.csv' 
-        seq_csv := seq_dir + 'all_sequenced_syllables.csv'
         
         #make the output locations
         if (!syl_dir.isDir()) {syl_dir.mkdir()}
-        if (!seq_dir.isDir()) {seq_dir.mkdir()}
         
         #execute the same task, but one the combined list
         #the difference in the run is handled by the module
         #this is a long ass task, thats why I made it optional with the -m flag 
-        string Cluster_tid = task(taskName := task_cluster, [syl_csv, seq_csv] <- hdf5_list, cpus := n){
+        string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_list, cpus := n){
             #provide some feedback
             sys echo $task_cluster
 
-            sys python3 $pipe_modules/cluster_syllables.py -s 'all_samples' -i $hdf5_file -o $syl_csv -p $seq_csv -n $n -c $c
+            sys python3 $pipe_modules/cluster_syllables.py -s 'all_samples' -i $hdf5_file -o $syl_csv -n $n -c $c
         }     
     }    
 }
@@ -232,7 +226,6 @@ wait
 
 #glob all the paths
 string[] syl_csv_list 
-string[] seq_csv_list 
 
 #list all samples that made it through clustering
 string[] clustered_samples = clustered_syllables.dir()
@@ -240,42 +233,24 @@ for (string sample : clustered_samples) {
     
     #Build the paths
     syl_path := clustered_syllables + sample +'/'
-    seq_path := sequenced_syllables + sample +'/'
-    
     syl_csv_list += syl_path.dirPath('*_clustered_syllables.csv')
-    seq_csv_list += seq_path.dirPath('*_sequenced_syllables.csv')
     
 }
 
 #join the lists
 syl_csv_file := syl_csv_list.join('__SPLIT__')
-seq_csv_file := seq_csv_list.join('__SPLIT__')
 
 #set up the output paths
 syl_rds := experiment + 'Clustered_Syllables.rds'
-seq_rds := experiment + 'Sequenced_Syllables.rds'
 
 #info for the tasks
 task_agg_syl := 'Aggregating Syllable Datasets'
-task_agg_seq := 'Aggregating Sequence Datasets'
 
-#Aggregate the data in R. Do it in parallel bc why not
-par{
-    #execute the task for the syllables
-    string Agg_syl_tid = task(taskName := task_agg_syl, syl_rds <- syl_csv_list, cpus := n){
-        #provide some feedback
-        sys echo $task_agg_syl
+#Aggregate the data in R. 
+#execute the task for the syllables
+string Agg_syl_tid = task(taskName := task_agg_syl, syl_rds <- syl_csv_list, cpus := n){
+    #provide some feedback
+    sys echo $task_agg_syl
         
-         
-    
-    }
-    
-    #execute the task for the sequences
-    string Agg_seq_tid = task(taskName := task_agg_seq, seq_rds <- seq_csv_list, cpus := n){
-        #provide some feedback
-        sys echo $task_agg_seq
-        
-        
-    
-    }
+    sys Rscript $pipe_modules/aggregate_outputs.R -i $syl_csv_file -o $syl_rds -n $n
 }
