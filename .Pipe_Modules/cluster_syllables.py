@@ -45,7 +45,7 @@ hdf_list = hdf_list.split('__SPLIT__')
 
 ##Read in params
 #define our config file
-config = configparser.ConfigParser(strict=False)
+config = configparser.ConfigParser(strict=False, allow_no_value=True)
 config.read(config_path)
 
 #Read the config

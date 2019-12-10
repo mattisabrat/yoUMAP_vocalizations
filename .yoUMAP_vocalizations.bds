@@ -238,10 +238,11 @@ for (string sample : clustered_samples) {
 }
 
 #join the lists
-syl_csv_file := syl_csv_list.join('__SPLIT__')
+syl_csv_file  := syl_csv_list.join('__SPLIT__')
+cluster_files := clustered_samples.join('__SPLIT__')
 
 #set up the output paths
-syl_rds := experiment + 'Clustered_Syllables.rds'
+syl_rds := experiment + 'yoUMAPped_Syllables.rds'
 
 #info for the tasks
 task_agg_syl := 'Aggregating Syllable Datasets'
@@ -252,5 +253,5 @@ string Agg_syl_tid = task(taskName := task_agg_syl, syl_rds <- syl_csv_list, cpu
     #provide some feedback
     sys echo $task_agg_syl
         
-    sys Rscript $pipe_modules/aggregate_outputs.R -i $syl_csv_file -o $syl_rds -n $n
+    sys Rscript $pipe_modules/aggregate_outputs.R -i $syl_csv_file -o $syl_rds -n $n -s $cluster_files
 }

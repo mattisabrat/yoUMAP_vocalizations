@@ -36,8 +36,15 @@ wav_list     = wav_list.split('__SPLIT__')
 animal_names = [sample] * len(wav_list)
 
 #Create the vecotr of elast edited time.
-wav_times = [dt.fromtimestamp(os.path.getmtime(wav_path)) 
-             for wav_path in wav_list]
+wav_times = []
+n_no_date = 0
+for wav_file in wav_list:
+        # default give up method
+        dt = datetime(1900, 1, 1, 0, 0) + timedelta(days=n_no_date)
+        n_no_date+=1
+        wav_times.append(dt)    
+        
+
 
 # Make a pandas dataframe with the file paths, date_times, and names 
 wav_df = pd.DataFrame.from_dict({'filename': wav_list,
@@ -46,7 +53,7 @@ wav_df = pd.DataFrame.from_dict({'filename': wav_list,
 
 ##Read in params
 #define our config file
-config = configparser.ConfigParser(strict=False)
+config = configparser.ConfigParser(strict=False, allow_no_value=True)
 config.read(config_path)
 
 #Read the config into the dictionary
@@ -81,8 +88,18 @@ param_dict = {
     'vocal_freq_max' : float(config.get('segment_songs', 'vocal_freq_max'))
     }
 
+#for idx, row in wav_df.iterrows():
+#    pp.process_bird_wav(row['name'], 
+#                        row['filename'],
+#                        row['wav_time'],
+#                        param_dict,
+#                        output_path,
+#                        verbose = True,
+#                        visualize= False,
+#                        skip_created= True,
+#                        save_spectrograms= True)
 
-##Segment the files
+#Segment the files
 with Parallel(n_jobs=nThreads, verbose=0) as parallel:
     parallel(
         delayed(pp.process_bird_wav)(row['name'], 
@@ -90,7 +107,7 @@ with Parallel(n_jobs=nThreads, verbose=0) as parallel:
                                      row['wav_time'],
                                      param_dict,
                                      output_path,
-                                     verbose = True,
+                                     verbose = False,
                                      visualize= False,
                                      skip_created= True,
                                      save_spectrograms= True) 

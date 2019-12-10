@@ -45,7 +45,7 @@ wav_list  = wav_list.split('__SPLIT__')
 
 ##Read in params
 #define our config file
-config = configparser.ConfigParser(strict=False)
+config = configparser.ConfigParser(strict=False, allow_no_value=True)
 config.read(config_path)
 
 #Read the config into the dictionary
@@ -73,7 +73,8 @@ param_dict = {
     'ref_level_db'        : float(config.get('segment_syllables', 'ref_level_db')),
     'sample_rate'         : float(config.get('segment_syllables', 'sample_rate')), 
     'fmin'                : float(config.get('segment_syllables', 'fmin')), 
-    'fmax'                : float(config.get('segment_syllables', 'fmax')),
+    #'fmax'                : float(config.get('segment_syllables', 'fmax')),
+    'fmax': None,
     
     # Vocal Envelope
     'smoothing'      : str(  config.get('segment_syllables', 'smoothing')),
