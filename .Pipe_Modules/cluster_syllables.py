@@ -65,7 +65,7 @@ hdf_content = load_from_hdf5([hdf_loc], to_load)
 #Handle the not enough syllables case
 if ( len(hdf_content['name']) < min_syls):
     logging.error('%s has %s syllables,  min is %s , will not cluster.' %
-                  (animal, len(hdf_content['animal']), min_syls,))
+                  (animal, len(hdf_content['name']), min_syls,))
     sys.exit(1)
 
 # embed spectrograms in low dim space
