@@ -174,7 +174,7 @@ par{
 
         if (m == 1 || m == 2) {
             #Task for clustering and sequencing
-            string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_file, cpus := n){
+            string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_file, cpus := n, canFail = true){
                 
                 #provide some feedback
                 sys echo $task_cluster
@@ -205,7 +205,7 @@ par{
         #execute the same task, but one the combined list
         #the difference in the run is handled by the module
         #this is a long ass task, thats why I made it optional with the -m flag 
-        string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_list, cpus := n){
+        string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_list, cpus := n, canFail = true){
             #provide some feedback
             sys echo $task_cluster
 
@@ -225,7 +225,10 @@ wait
 #-------------------------------------------------------------------
 
 #glob all the paths
-string[] syl_csv_list 
+string[] syl_csv_list
+
+#List of smaples  to name the R dataframes
+string[] sample_list
 
 #list all samples that made it through clustering
 string[] clustered_samples = clustered_syllables.dir()
@@ -235,11 +238,13 @@ for (string sample : clustered_samples) {
     syl_path := clustered_syllables + sample +'/'
     syl_csv_list += syl_path.dirPath('*_clustered_syllables.csv')
     
+    #append list
+    if (syl_path.dirPath('*_clustered_syllables.csv').size() > 0){ sample_list += sample }
 }
 
 #join the lists
 syl_csv_file  := syl_csv_list.join('__SPLIT__')
-cluster_files := clustered_samples.join('__SPLIT__')
+samples       := sample_list.join('__SPLIT__')
 
 #set up the output paths
 syl_rds := experiment + 'yoUMAPped_Syllables.rds'
@@ -253,5 +258,5 @@ string Agg_syl_tid = task(taskName := task_agg_syl, syl_rds <- syl_csv_list, cpu
     #provide some feedback
     sys echo $task_agg_syl
         
-    sys Rscript $pipe_modules/aggregate_outputs.R -i $syl_csv_file -o $syl_rds -n $n -s $cluster_files
+    sys Rscript $pipe_modules/aggregate_outputs.R -i $syl_csv_file -o $syl_rds -n $n -s "$samples"
 }
