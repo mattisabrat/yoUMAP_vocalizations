@@ -1,6 +1,5 @@
 /*
-!/.bin/bds/**
-!/.bin/AVGN/**
+!/.bin
 !/.gitignore
 !/*.sh
 !/*.bds
