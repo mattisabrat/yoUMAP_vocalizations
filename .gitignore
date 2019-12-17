@@ -1,0 +1,11 @@
+/*
+!/.bin/bds/**
+!/.bin/AVGN/**
+!/.gitignore
+!/*.sh
+!/*.bds
+!/.Pipe_Modules
+!/.Install_Scripts
+!/.Defaults.config
+!/Test
+!/LICENSE
