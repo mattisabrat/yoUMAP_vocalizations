@@ -71,9 +71,9 @@ if ( len(hdf_content['name']) < min_syls):
 # embed spectrograms in low dim space
 #resize
 x = hdf_content['spectrograms']
-x_small = [resize(i, [16,16]) for i in x]
-x_small = np.array(x_small).reshape((len(x_small), np.prod(np.shape(x_small)[1:])))
-x_small = [(i*255).astype('uint8') for i in x_small]
+x_small = [resize(i, [resize_dim,resize_dim]) for i in x] #down sample
+x_small = np.array(x_small).reshape( (len(x_small), np.prod(np.shape(x_small)[1:]))) #reshape to vectors
+x_small = [(i*255).astype('uint8') for i in x_small] #type convert
 
 #embed
 clusterable_embedding = umap.UMAP(
