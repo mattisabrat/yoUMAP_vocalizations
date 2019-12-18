@@ -8,9 +8,8 @@
 # make 
 # rm 
 ##---------------------------------------------------------------------
-
 #Save the head directory path
-BasePath=$PWD
+BasePath="$( cd "$(dirname "$0")" ; pwd -P )"
 
 #echo "installing R \n\n"
 #First R
@@ -34,26 +33,20 @@ cd $BasePath
 rm Python-3.7.3.tgz
 rm -rf Python-3.7.3/
 
-#Anything else you need, you get the idea
 
 ##---------------------------------------------------------------------
 # Execute the package installing scripts in R and Python
 ##---------------------------------------------------------------------
-
 #Set up necessary path variables for the package installer scripts
-PATH=$(getconf PATH)
-export PATH=$PWD/.bin/R/bin:$PATH
-export PATH=$PWD/.bin/Python/bin:$PATH
-export PYTHONPATH=$PWD/.bin/Python/bin
+export PATH=$BasePath/.bin/R/bin:$PATH
+export PATH=$BasePath/.bin/Python/bin:$PATH
 
 #Execute the package installer scripts
-
-Rscript --vanilla $PWD/.Install_Scripts/R_packages.R
-./.Install_Scripts/Python_packages.sh 
+Rscript --vanilla $BasePath/.Install_Scripts/R_packages.R
+.$BasePath/.Install_Scripts/Python_packages.sh 
 
 
 ##---------------------------------------------------------------------
 # Self Destruct
 ##---------------------------------------------------------------------
-
 mv $0 .Install.sh

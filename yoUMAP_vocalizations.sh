@@ -8,15 +8,10 @@
 #adds portability and prevents user error. 
 #Make sure you put your paths at the front of $PATH not the end
 #--------------------------------------------------------------------------
-
-PATH=$(getconf PATH)
-java_dir="$(which java)"
-java_dir=${java_dir%java}
-export PATH="$java_dir":$PATH
-export PATH=$PWD/.bin/bds:$PATH
-export PATH=$PWD/.bin/R/bin:$PATH
-export PATH=$PWD/.bin/Python/bin:$PATH
-export PYTHONPATH=$PWD/.bin/Python/bin:$PYTHONPATH
+BasePath="$( cd "$(dirname "$0")" ; pwd -P )"
+export PATH=$BasePath/.bin/bds:$PATH
+export PATH=$BasePath/.bin/R/bin:$PATH
+export PATH=$BasePath/.bin/Python/bin:$PATH
 
 
 #-------------------------------------------------------------------------
@@ -25,11 +20,10 @@ export PYTHONPATH=$PWD/.bin/Python/bin:$PYTHONPATH
 #Threads per task supplied on the -n flag, defaults to 1
 #Override default flags with user supplied flags using -f
 #-------------------------------------------------------------------------
-
 Provided_Dir=false
 mode=1
 nThreads=1
-config=$PWD/.Defaults.config
+config=$BasePath/.Defaults.config
 
 while getopts ':e:n:m:c:' flag; do
   case "${flag}" in
@@ -54,4 +48,4 @@ fi
 #--------------------------------------------------------------------------
 #Execute the pipeline on the specified directory
 #--------------------------------------------------------------------------
-bds -c $PWD/.bin/bds/bds.config ./.yoUMAP_vocalizations.bds -e ${Experiment}  -n ${nThreads} -m ${mode}
+bds -c $BasePath/.bin/bds/bds.config ./.yoUMAP_vocalizations.bds -e ${Experiment}  -n ${nThreads} -m ${mode}
