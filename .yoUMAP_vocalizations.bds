@@ -8,7 +8,6 @@
 string e = "Not_A_Dir"                 #experimental directory variable 
 int n    = 1                          #default number of cores per task
 string c = ppwd + '/.Defaults.config' #path to the config file
-int m    = 1
 
 
 #-------------------------------------------------------------------
@@ -172,46 +171,17 @@ par{
         #info for the task
         task_cluster := 'Clustering and sequencing: ' + sample
 
-        if (m == 1 || m == 2) {
-            #Task for clustering and sequencing
-            string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_file, cpus := n, canFail = true){
+        #Task for clustering and sequencing
+        string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_file, cpus := n, canFail = true){
                 
-                #provide some feedback
-                sys echo $task_cluster
-                
-                #Run the module
-                sys python3 $pipe_modules/cluster_syllables.py -s $sample -i $hdf5_file -o $syl_csv -n $n -c $c
-            }    
-        }
-    }
-    
-    if (m == 1 || m ==3){
-
-        #Now the experiment level run. This is the slowest bit in the code because its clustering on all syllables
-        
-        #info for the task
-        task_cluster := 'Clustering and sequencing: all_samples'
-        
-        #Collapse the list of paths
-        hdf5_file := hdf5_list.join('__SPLIT__')
-        
-        #Set up the paths for the csvs
-        syl_dir := clustered_syllables + 'all_syllables/'
-        syl_csv := syl_dir + 'all_clustered_syllables.csv' 
-        
-        #make the output locations
-        if (!syl_dir.isDir()) {syl_dir.mkdir()}
-        
-        #execute the same task, but one the combined list
-        #the difference in the run is handled by the module
-        #this is a long ass task, thats why I made it optional with the -m flag 
-        string Cluster_tid = task(taskName := task_cluster, syl_csv <- hdf5_list, cpus := n, canFail = true){
             #provide some feedback
             sys echo $task_cluster
-
-            sys python3 $pipe_modules/cluster_syllables.py -s 'all_samples' -i $hdf5_file -o $syl_csv -n $n -c $c
-        }     
-    }    
+                
+            #Run the module
+            sys python3 $pipe_modules/cluster_syllables.py -s $sample -i $hdf5_file -o $syl_csv -n $n -c $c
+                
+        }
+    }
 }
 
 #Let finish

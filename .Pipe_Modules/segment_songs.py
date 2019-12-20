@@ -40,7 +40,7 @@ wav_times = []
 n_no_date = 0
 for wav_file in wav_list:
         # default give up method
-        dt = datetime(1900, 1, 1, 0, 0) + timedelta(days=n_no_date)
+        dt = datetime(1000, 1, 1, 0, 0) + timedelta(days=n_no_date)
         n_no_date+=1
         wav_times.append(dt)    
         
@@ -88,16 +88,6 @@ param_dict = {
     'vocal_freq_max' : float(config.get('segment_songs', 'vocal_freq_max'))
     }
 
-#for idx, row in wav_df.iterrows():
-#    pp.process_bird_wav(row['name'], 
-#                        row['filename'],
-#                        row['wav_time'],
-#                        param_dict,
-#                        output_path,
-#                        verbose = True,
-#                        visualize= False,
-#                        skip_created= True,
-#                        save_spectrograms= True)
 
 #Segment the files
 with Parallel(n_jobs=nThreads, verbose=0) as parallel:

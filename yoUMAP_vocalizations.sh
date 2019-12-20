@@ -25,11 +25,10 @@ mode=1
 nThreads=1
 config=$BasePath/.Defaults.config
 
-while getopts ':e:n:m:c:' flag; do
+while getopts ':e:n:c:' flag; do
   case "${flag}" in
     e) Provided_Dir=true; Experiment="${OPTARG}";;  #mandatory flag
     n) nThreads="${OPTARG}" ;;
-    m) mode="${OPTARG}";;
     c) config="${OPTARG}";;
   esac
 done
@@ -48,4 +47,4 @@ fi
 #--------------------------------------------------------------------------
 #Execute the pipeline on the specified directory
 #--------------------------------------------------------------------------
-bds -c $BasePath/.bin/bds/bds.config ./.yoUMAP_vocalizations.bds -e ${Experiment}  -n ${nThreads} -m ${mode}
+bds -c $BasePath/.bin/bds/bds.config ./.yoUMAP_vocalizations.bds -e ${Experiment}  -n ${nThreads}
