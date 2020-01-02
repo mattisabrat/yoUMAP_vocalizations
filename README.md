@@ -10,7 +10,8 @@ This pipeline is a wrapper for awesome code other people wrote and which I had n
 * [umap-learn](https://umap-learn.readthedocs.io/en/latest/)
 * [HDBSCAN](https://hdbscan.readthedocs.io/en/latest/)
 
-## Prerequisites
+## System Prerequisites
+* Should work on any Linux or Mac capable of running Java. I have it running locally on Ubuntu 19.10 (Eoan) and Red Hat Enterprise Linux Server 7.2 (Maipo) on the cluster.
 * Java - required for [BDS](https://pcingola.github.io/BigDataScript/)
 
 ## Installation - Local Machine
@@ -24,17 +25,77 @@ Super easy, it self deploys. Give it like 30 minutes:
 ## Installation - Cluster Environment
 Maybe not SUPER easy, but still pretty easy as far as cluster implementations go. 
 * Follow the directions for local installation
-* Edit the bds config file found at yoUMAP_vocalizations/.bin/bds/bds.config according the appropriate [BDS docs on Cluster Options](https://pcingola.github.io/BigDataScript/manual/site/bdsconfig/#cluster-options) for your cluster environment
+* Edit the bds config file found at *yoUMAP_vocalizations/.bin/bds/bds.config* according the appropriate [BDS docs on Cluster Options](https://pcingola.github.io/BigDataScript/manual/site/bdsconfig/#cluster-options) for your cluster environment
   * Generic cluster scripts for some common environments can be found on the [BDS github](https://github.com/pcingola/BigDataScript/tree/master/config)
-  * I included the scripts I use to interface with SLURM in yoUMAP_vocalizations/.bin/bds_clusterGeneric_SLURM/
+  * I included the scripts I use to interface with SLURM in *yoUMAP_vocalizations/.bin/bds_clusterGeneric_SLURM/*
 
 ## Usage
 
-      ./yoUMAP_vocalizations -e $Path_to_Experimental_Directory -n $Threads_per_Task -c Path_to_Config_File
+      ./yoUMAP_vocalizations -e /Path/to/Experimental/Directory/ -n Threads_per_Task -c Path/to/Config/File
+
+* -n: Defaults to 1
+  * For more information on task structure and thread allocation, see **Resource Usage and Parallelization** below
+* -c: Defaults to  *yoUMAP_vocalizations/Defaults.config*
 
 ## Input Structure / Experimental Directory Formatting
+Your *Experimental_Directory/* must be correctly formatted for the pathway to run. The *Experimental_Directory/* must contain a sudirectory *Experimental_Directory/Raw_Inputs/*. *Raw_Inputs/* should contain a subdirectory for each sample, lets call them *sample_folder/* s, with the sample's name as the *sample_folder/* name. This *sample_folder/* name will be taken by the pipeline as the sample's name in the output. Each sample_folder should contain all the **.wav** files associated with that sample. **The *sample_folder/* name CANNOT include *"wav"*.** It will break the code, so don't do it. I don't feel rewriting  that step without regular expressions.
 
-## Output Structure / Getting Up and Running in R
+### Example
+* Experimental_Directory/
+  * Raw_Inputs/
+    * Bird_1/
+      * 1.wav
+      * 2.wav
+      * ...
+      * 999.wav
+    * Bird_2/
+    * Bird_3/
+
+## Output Structure 
+The final output of the pipeline can be found at */Experimental_Directory/yoUMAPped_syllables.rds*. 
+
+### Example
+* Experimental_Directory/
+  * Raw_Inputs/
+    * Bird_1/
+      * something.wav
+      * ...
+    * .../
+  * Segmented_Songs/
+    * Bird_1/
+      * song_chk.txt
+      * Bird_1/
+        * wavs/
+          * 1000-01-01_00-00-00-000000.wav
+          * ...
+        * specs/
+          * 1000-01-01_00-00-00-000000.png
+          * ...
+        * csv/
+          * 1000-01-01_00-00-00-000000.csv
+          * ...
+    * .../
+  * Segmented_Syllables/
+    * Bird_1/
+      * Bird_1_segmented_syllables.hdf5
+    * .../
+  * Clustered_Syllables/
+    * Bird_1/
+      * Bird_1_clustered_syllables.csv
+    * .../
+  * yoUMAPped_syllables.rds
+
+### Getting Up and Running in R
+The output data can be loaded into R using:
+      
+      syll_dfs <- readRDS('Path/To/Experimental_Directory/yoUMAPped_syllables.rds')
+      
+This produces a named list of data.frames with the following column names:
+
+     names(syll_dfs[['Bird_0']])
+
+     [1] "spectrograms"       "syll_length_s"      "start_time_rel_wav" "animal"             "labels"             "sequence_syllable"  "sequence_num"      
+     [8] "z1"                 "z2"                 "seg_song_wav"       "orig_wav"                   
 
 ## Configuration
 This is where the beast lives. 
@@ -42,4 +103,6 @@ This is where the beast lives.
 ## Tuning Segmentation
 
 ## Tests
+
+## Resource Usage and Parallelization
 
