@@ -141,15 +141,6 @@ returns the scatter plots for all samples in the list. Similarly:
 
 Adds a column, "new_col" to all tibbles in syll_tlbs. This "new_col" is some_function of the syllable's position in low dimenstional space. This could also be used to map additional experimental variables such as "days_post_lesion" or "optogenetic_state" using the orig_wav column.
 
-## Configuration
-This is where the beast lives. 
-
-## Tuning Segmentation
-
-## Tests
-
-## Resource Usage and Parallelization
-
 ## To Do
   * Animal level clustering
   * Include test files and an automatic test upon install
