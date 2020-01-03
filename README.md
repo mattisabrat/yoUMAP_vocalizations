@@ -34,7 +34,6 @@ Maybe not SUPER easy, but still pretty easy as far as cluster implementations go
       ./yoUMAP_vocalizations -e /Path/to/Experimental/Directory/ -n Threads_per_Task -c Path/to/Config/File
 
 * -n: Defaults to 1
-  * For more information on task structure and thread allocation, see **Resource Usage and Parallelization** below
 * -c: Defaults to  *yoUMAP_vocalizations/Defaults.config*
 
 ## Input Structure / Experimental Directory Formatting
