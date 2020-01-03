@@ -82,11 +82,11 @@ The final output of the pipeline can be found at */Experimental_Directory/yoUMAP
 ## Getting Up and Running in R
 The output data can be loaded into R using:
       
-      syll_dfs <- readRDS('Path/To/Experimental_Directory/yoUMAPped_syllables.rds')
+      syll_tbls <- readRDS('Path/To/Experimental_Directory/yoUMAPped_syllables.rds')
       
 This produces a named list of [tibbles](https://tibble.tidyverse.org/) with the following column names:
 
-     names(syll_dfs[['Bird_1']])
+     names(syll_tbls[['Bird_1']])
 
      [1] "spectrograms"       "syll_length_s"      "start_time_rel_wav" "animal"             "labels"             "sequence_syllable"  "sequence_num"      
      [8] "z1"                 "z2"                 "seg_song_wav"       "orig_wav"                   
@@ -103,7 +103,43 @@ This produces a named list of [tibbles](https://tibble.tidyverse.org/) with the 
 * seg_song_wav : Location of the segmented song containing the syllable
 * orig_wav : Location of raw input containing the syllable
 
-###
+### Functions
+To load the supplied R functions, run:
+
+      source('/Path/to/yoUMAP_vocalizations/.bin/r_functions.R')
+ 
+ #### Descriptions
+      
+      image_spectrogram(spectrogram_as_factor,show=TRUE)
+* Returns the input spectrogram as a matrix 
+* Displays the spectrogram if show=TRUE
+
+      sample_cluster(syll_tbl, cluster_label, n, r_seed=42, show=TRUE)
+* Returns n randomly sampled spectrograms from cluster_label in syll_tbl as matrices
+* Displays the spectrograms if show=TRUE
+* Set the random seed with r_seed
+
+      scatter_clusters(syll_tbl, show=TRUE, size=0.5, alpha=1, filter_unlabled=TRUE)
+* Scatter plot of syllables in low dimensional space, colored by syll_tbl$labels
+
+      line_seqs <- function(syll_df, show=TRUE, alpha=0.05)
+* Line plot of syllable sequences in low dimensional space
+
+### Data processing using lapply
+I intentionally made the output a list of tibble to simplify data processing across all samples using lapply in combination with the tidyverse. For example:
+
+      lapply(X=syll_tlbs, FUN=scatter_clusters)
+      
+returns the scatter plots for all samples in the list. Similarly:
+      
+      library('dplyr')
+      syll_tbls <- lapply(X=syll_tbls, FUN=function(syll_tbl){
+          new_syll_tbl <- syll_tbl %>%
+              mutute(new_col = some_function(z1,z2))
+          return(new_syll_tbl)
+      })
+
+Adds a column, "new_col" to all tibbles in syll_tlbs. This "new_col" is some_function of the syllable's position in low dimenstional space. This could also be used to map additional experimental variables such as "days_post_lesion" or "optogenetic_state" using the orig_wav column.
 
 ## Configuration
 This is where the beast lives. 
