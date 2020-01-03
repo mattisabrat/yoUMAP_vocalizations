@@ -47,9 +47,7 @@ Your *Experimental_Directory/* must be correctly formatted for the pathway to ru
       * 1.wav
       * 2.wav
       * ...
-      * 999.wav
-    * Bird_2/
-    * Bird_3/
+    * .../
 
 ## Output Structure 
 The final output of the pipeline can be found at */Experimental_Directory/yoUMAPped_syllables.rds*. 
@@ -57,10 +55,6 @@ The final output of the pipeline can be found at */Experimental_Directory/yoUMAP
 ### Example
 * Experimental_Directory/
   * Raw_Inputs/
-    * Bird_1/
-      * something.wav
-      * ...
-    * .../
   * Segmented_Songs/
     * Bird_1/
       * song_chk.txt
@@ -85,17 +79,31 @@ The final output of the pipeline can be found at */Experimental_Directory/yoUMAP
     * .../
   * yoUMAPped_syllables.rds
 
-### Getting Up and Running in R
+## Getting Up and Running in R
 The output data can be loaded into R using:
       
       syll_dfs <- readRDS('Path/To/Experimental_Directory/yoUMAPped_syllables.rds')
       
-This produces a named list of data.frames with the following column names:
+This produces a named list of [tibbles](https://tibble.tidyverse.org/) with the following column names:
 
-     names(syll_dfs[['Bird_0']])
+     names(syll_dfs[['Bird_1']])
 
      [1] "spectrograms"       "syll_length_s"      "start_time_rel_wav" "animal"             "labels"             "sequence_syllable"  "sequence_num"      
      [8] "z1"                 "z2"                 "seg_song_wav"       "orig_wav"                   
+
+* spectrograms : Matrix of the spectrogram as a Factor. Can be converted to matrix, see **Functions**
+* syll_length_s : Length of syllable in seconds
+* start_time_rel_wav : Start time of syllable within *seg_song_wav*
+* animal : Animal name, same as list element name, inherited from the *sample_folder/* name
+* labels : HDBSCAN assigned cluster label, -1 is unassigned
+* sequence_syllable : Syllable's ordinal position within it's sequence
+* sequence_number : Sequence identifier
+* z1 : Component 1 of syllable's representation in low dimensional space 
+* z2 : Component 2 of syllabel's representation in low dimensional space
+* seg_song_wav : Location of the segmented song containing the syllable
+* orig_wav : Location of raw input containing the syllable
+
+###
 
 ## Configuration
 This is where the beast lives. 
@@ -105,4 +113,10 @@ This is where the beast lives.
 ## Tests
 
 ## Resource Usage and Parallelization
+
+## To Do
+  * Animal level clustering
+  * Include test files and an automatic test upon install
+  * Turn the R functions into a proper R package. Does that have to be its own repo?
+  * Figure out exactly how to assist users in tuning the segmentation parameters. Probably a jupyter notebook capable of writing out to the config file.
 
