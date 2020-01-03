@@ -37,7 +37,7 @@ Maybe not SUPER easy, but still pretty easy as far as cluster implementations go
 * -c: Defaults to  *yoUMAP_vocalizations/Defaults.config*
 
 ## Input Structure / Experimental Directory Formatting
-Your *Experimental_Directory/* must be correctly formatted for the pathway to run. The *Experimental_Directory/* must contain a sudirectory *Experimental_Directory/Raw_Inputs/*. *Raw_Inputs/* should contain a subdirectory for each sample, lets call them *sample_folder/* s, with the sample's name as the *sample_folder/* name. This *sample_folder/* name will be taken by the pipeline as the sample's name in the output. Each sample_folder should contain all the **.wav** files associated with that sample. **The *sample_folder/* name CANNOT include *"wav"*.** It will break the code, so don't do it. I don't feel rewriting  that step without regular expressions.
+Your *Experimental_Directory/* must be correctly formatted for the pipeline to run. The *Experimental_Directory/* must contain a sudirectory *Experimental_Directory/Raw_Inputs/*. *Raw_Inputs/* should contain a subdirectory for each sample, lets call them *sample_folder/* s, with the sample's name as the *sample_folder/* name. This *sample_folder/* name will be taken by the pipeline as the sample's name in the output. Each sample_folder should contain all the **.wav** files associated with that sample. **The *sample_folder/* name CANNOT include *"wav"*.** It will break the code, so don't do it. I don't feel rewriting  that step without regular expressions.
 
 ### Example
 * Experimental_Directory/
