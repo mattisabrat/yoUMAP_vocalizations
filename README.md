@@ -122,7 +122,7 @@ To load the supplied R functions, run:
       scatter_clusters(syll_tbl, show=TRUE, size=0.5, alpha=1, filter_unlabled=TRUE)
 * Scatter plot of syllables in low dimensional space, colored by syll_tbl$labels
 
-      line_seqs <- function(syll_df, show=TRUE, alpha=0.05)
+      line_seqs <- function(syll_tbl, show=TRUE, alpha=0.05)
 * Line plot of syllable sequences in low dimensional space
 
 ### Data processing using lapply
