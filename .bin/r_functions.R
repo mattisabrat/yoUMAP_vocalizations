@@ -1,7 +1,7 @@
 #Given a spectrogram as a factor, returns the matrix and produces the image
 image_spectrogram <- function(spectrogram_as_factor,show=TRUE){
   #split based on the comma
-  splits <- as.list(strsplit(x = as.character(spectrogram_as_factor[r]),
+  splits <- as.list(strsplit(x = as.character(spectrogram_as_factor),
                              split = '], [',
                              fixed = TRUE)[[1]])
   
@@ -36,7 +36,7 @@ sample_cluster <- function(syll_tbl, cluster_label, n, r_seed=42, show=TRUE){
   df2 <-df[runif(n,1,nrow(df)), ]
 
   #Get spectrogrms
-  specs <- lapply(X=as.list(df2$spectrograms), FUN=yoUMAP_image_spectrogram, show=show)
+  specs <- lapply(X=as.list(df2$spectrograms), FUN=image_spectrogram, show=show)
 }
 
 #Scatter plot, Color is cluster label

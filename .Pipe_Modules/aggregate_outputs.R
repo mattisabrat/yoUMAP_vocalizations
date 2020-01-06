@@ -85,7 +85,7 @@ convert_table <- data.frame(seg_song_paths = as.character(unique_paths),
 #reformat---------------------------------------------------------------------------------------------------
 dfs <- lapply(X = dfs, FUN = function(df){
   df %>% 
-    group_by(sequence_num) %>%
+    group_by(X) %>%
     #split z into two cols
     mutate(z1 = unlist(z_to_floats(z))[1],
            z2 = unlist(z_to_floats(z))[2]) %>%
@@ -100,8 +100,7 @@ dfs <- lapply(X = dfs, FUN = function(df){
     mutate(z  = NULL,
            day_num = NULL,
            original_wav = NULL,
-           syllable_time = NULL,
-           X = NULL) 
+           syllable_time = NULL) 
 })
 
 #apply sample names
