@@ -13,9 +13,10 @@ This pipeline is a wrapper for awesome code other people wrote and which I had n
 ## System Prerequisites
 * Should work on any Linux or Mac capable of running Java. I have it running locally on Ubuntu 19.10 (Eoan) and Red Hat Enterprise Linux Server 7.2 (Maipo) on the cluster.
 * Java - required for [BDS](https://pcingola.github.io/BigDataScript/)
+* R with the [tidyverse](https://www.tidyverse.org/)- plotting and analysis
 
 ## Installation - Local Machine
-Super easy, it self deploys. Give it like 30 minutes:
+Super easy, it self deploys. Takes a few minutes:
 
       git clone https://github.com/mattisabrat/yoUMAP_vocalizations.git
       cd yoUMAP_vocalizations
@@ -119,10 +120,10 @@ To load the supplied R functions, run:
 * Set the random seed with r_seed
 
       scatter_clusters(syll_tbl, show=TRUE, size=0.5, alpha=1, filter_unlabled=TRUE)
-* Scatter plot of syllables in low dimensional space, colored by syll_tbl$labels
+* Scatter plot of syllables in low dimensional space, colored by syll_tbl$labels, example plot below in **Tests**
 
       line_seqs <- function(syll_tbl, show=TRUE, alpha=0.05)
-* Line plot of syllable sequences in low dimensional space
+* Line plot of syllable sequences in low dimensional space, example plot below in **Tests**
 
 ### Data processing using lapply
 I intentionally made the output a list of tibble to simplify data processing across all samples using lapply in combination with the tidyverse. For example:
@@ -140,9 +141,32 @@ returns the scatter plots for all samples in the list. Similarly:
 
 Adds a column, "new_col" to all tibbles in syll_tlbs. This "new_col" is some_function of the syllable's position in low dimenstional space. This could also be used to map additional experimental variables such as "days_post_lesion" or "optogenetic_state" using the orig_wav column.
 
+## Tests
+The pipeline comes with a one animal test dataset taken from [Katahira K, Suzuki K, Kagawa H, Okanoya K (2013) A simple explanation for the evolution of complex song syntax in Bengalese finches. Biology Letters 9(6): 20130842.](https://doi.org/10.1098/rsbl.2013.0842 https://datadryad.org//resource/doi:10.5061/dryad.6pt8g) The unmodified Defaults.config is appropriate for the processing of these data.
+
+Assuming you installed in your home (~) directory run the following:
+
+      cd yoUMAP_vocalizations/
+      ./yoUMAP_vocalizations.sh -e test_dir/
+      
+Now open R in RStudio or a Jupyter notebook and run:
+      
+      source('~/yoUMAP_vocalizations/.bin/r_functions.R')
+      syll_tbls <- readRDS('~/yoUMAP_vocalizations/test_dir/yoUMAPped_Syllables.rds')
+      scatter_clusters(syll_tbls[['Bird0']])
+      line_seqs(syll_tbls[['Bird0']])
+
+This should produce the following plots, if it doesn't you have an issue:
+
+![scatter_clusters](http://drive.google.com/uc?export=view&id=1fvTI3ApAwif_ouYTfyLdJvJh6G6WLyQV)
+![line_seqs](http://drive.google.com/uc?export=view&id=1eymQL3v3VZiRbQ_xMf0swsunVnA6ulqi)
+
+## Console output
+The pipeline produces a lot of console vomit, sorry. Its a to do.
+
 ## To Do
-  * Animal level clustering
-  * Include test files and an automatic test upon install
+  * Animal level clustering?
+  * Tame the console vomit. 
   * Turn the R functions into a proper R package. Does that have to be its own repo?
-  * Figure out exactly how to assist users in tuning the segmentation parameters. Probably a jupyter notebook capable of writing out to the config file.
+  * Figure out exactly how to assist users in tuning the segmentation parameters. Probably a jupyter notebook capable of writing out a config file.
 
