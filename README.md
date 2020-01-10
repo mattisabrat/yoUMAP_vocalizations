@@ -169,3 +169,5 @@ The pipeline produces a lot of console vomit, sorry. Its a to do.
   * Turn the R functions into a proper R package. Does that have to be its own repo?
   * Figure out exactly how to assist users in tuning the segmentation parameters. Probably a jupyter notebook capable of writing out a config file.
 
+## Contribution
+This pipeline was written and is maintained by Matt Daveport (mdavenport@rockefeller.edu)
