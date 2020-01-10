@@ -158,8 +158,7 @@ Now open R in RStudio or a Jupyter notebook and run:
 
 This should produce the following plots, if it doesn't you have an issue:
 
-![scatter_clusters](http://drive.google.com/uc?export=view&id=1fvTI3ApAwif_ouYTfyLdJvJh6G6WLyQV)
-![line_seqs](http://drive.google.com/uc?export=view&id=1eymQL3v3VZiRbQ_xMf0swsunVnA6ulqi)
+![tests](https://docs.google.com/drawings/d/e/2PACX-1vTd2eyNpT-EdUcyW_y6uu6-D326nA1cOEzlrKhEJXlqxj831QWVRGG_2cSkrKTtCYvYC2g7X-C_XB8c/pub?w=940&h=466)
 
 ## Console output
 The pipeline produces a lot of console vomit, sorry. Its a to do.
