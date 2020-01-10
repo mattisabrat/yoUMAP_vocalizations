@@ -43,7 +43,7 @@ export PATH=$BasePath/.bin/Python/bin:$PATH
 
 #Execute the package installer scripts
 Rscript --vanilla $BasePath/.Install_Scripts/R_packages.R
-.$BasePath/.Install_Scripts/Python_packages.sh 
+$BasePath/.Install_Scripts/Python_packages.sh 
 
 
 ##---------------------------------------------------------------------
